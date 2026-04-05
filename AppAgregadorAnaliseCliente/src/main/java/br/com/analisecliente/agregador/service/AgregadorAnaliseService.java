@@ -1,5 +1,6 @@
 package br.com.analisecliente.agregador.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +60,7 @@ public class AgregadorAnaliseService {
         String cpfNumerico = normalizarCpf(request.getCpf());
         request.setCpf(cpfNumerico);
 
-        ProcessoAnalise processo = processoAnaliseRepository.findByRequestId(request.getRequestId())
+        ProcessoAnalise processo = processoAnaliseRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new ProcessoNaoEncontradoException(
                         "Processo não encontrado para o requestId informado"));
 
@@ -202,9 +203,10 @@ public class AgregadorAnaliseService {
         resultado.setVerificacaoStatusCliente(verificacaoStatusCliente);
         resultado.setResultadoConsolidado(resultadoConsolidado);
 
-        processo.setStatusProcesso(StatusAnalise.CONCLUIDO.name());
+        processo.setStatus(StatusAnalise.CONCLUIDO.name());
         processo.setResultado(resultado);
         processo.setErro(null);
+        processo.setDataHoraAtualizacao(LocalDateTime.now());
     }
 
     private void atualizarProcessoComErro(ProcessoAnalise processo, Throwable ex) {
@@ -212,9 +214,10 @@ public class AgregadorAnaliseService {
         erro.setOrigem(ORIGEM_ERRO);
         erro.setMensagem(ex.getMessage());
 
-        processo.setStatusProcesso(StatusAnalise.ERRO.name());
+        processo.setStatus(StatusAnalise.ERRO.name());
         processo.setResultado(null);
         processo.setErro(erro);
+        processo.setDataHoraAtualizacao(LocalDateTime.now());
     }
 
     private void validarRequest(ProcessarAnaliseRequest request) {

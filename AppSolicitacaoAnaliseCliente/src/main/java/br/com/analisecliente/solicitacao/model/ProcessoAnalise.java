@@ -17,6 +17,9 @@ public class ProcessoAnalise {
     private LocalDateTime dataHoraCriacao;
     private LocalDateTime dataHoraAtualizacao;
 
+    public ProcessoAnalise() {
+    }
+
     public String getRequestId() {
         return requestId;
     }

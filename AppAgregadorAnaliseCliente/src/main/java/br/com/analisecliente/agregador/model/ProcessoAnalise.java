@@ -5,27 +5,19 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "processo_analise")
+@Document(collection = "processos_analise")
 public class ProcessoAnalise {
 
     @Id
-    private String id;
     private String requestId;
     private String cpf;
-    private String statusProcesso;
-    private LocalDateTime dataHoraSolicitacao;
+    private String status;
     private ResultadoAnalise resultado;
     private ErroAnalise erro;
+    private LocalDateTime dataHoraCriacao;
+    private LocalDateTime dataHoraAtualizacao;
 
     public ProcessoAnalise() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getRequestId() {
@@ -44,20 +36,12 @@ public class ProcessoAnalise {
         this.cpf = cpf;
     }
 
-    public String getStatusProcesso() {
-        return statusProcesso;
+    public String getStatus() {
+        return status;
     }
 
-    public void setStatusProcesso(String statusProcesso) {
-        this.statusProcesso = statusProcesso;
-    }
-
-    public LocalDateTime getDataHoraSolicitacao() {
-        return dataHoraSolicitacao;
-    }
-
-    public void setDataHoraSolicitacao(LocalDateTime dataHoraSolicitacao) {
-        this.dataHoraSolicitacao = dataHoraSolicitacao;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public ResultadoAnalise getResultado() {
@@ -74,5 +58,21 @@ public class ProcessoAnalise {
 
     public void setErro(ErroAnalise erro) {
         this.erro = erro;
+    }
+
+    public LocalDateTime getDataHoraCriacao() {
+        return dataHoraCriacao;
+    }
+
+    public void setDataHoraCriacao(LocalDateTime dataHoraCriacao) {
+        this.dataHoraCriacao = dataHoraCriacao;
+    }
+
+    public LocalDateTime getDataHoraAtualizacao() {
+        return dataHoraAtualizacao;
+    }
+
+    public void setDataHoraAtualizacao(LocalDateTime dataHoraAtualizacao) {
+        this.dataHoraAtualizacao = dataHoraAtualizacao;
     }
 }
