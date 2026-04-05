@@ -1,0 +1,46 @@
+package br.com.analisecliente.fichalimpa.dto;
+
+import java.time.LocalDateTime;
+
+public class SolicitarVerificacaoFichaLimpaMessage {
+
+    private String requestId;
+    private String cpf;
+    private LocalDateTime dataHoraSolicitacao;
+
+    public SolicitarVerificacaoFichaLimpaMessage() {
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public LocalDateTime getDataHoraSolicitacao() {
+        return dataHoraSolicitacao;
+    }
+
+    public void setDataHoraSolicitacao(LocalDateTime dataHoraSolicitacao) {
+        this.dataHoraSolicitacao = dataHoraSolicitacao;
+    }
+
+    @Override
+    public String toString() {
+        return "SolicitarVerificacaoFichaLimpaMessage{" +
+                "requestId='" + requestId + '\'' +
+                ", cpf='" + cpf + '\'' +
+                ", dataHoraSolicitacao=" + dataHoraSolicitacao +
+                '}';
+    }
+}
