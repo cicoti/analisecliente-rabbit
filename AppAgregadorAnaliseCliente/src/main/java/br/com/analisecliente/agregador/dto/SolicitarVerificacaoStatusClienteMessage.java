@@ -2,14 +2,13 @@ package br.com.analisecliente.agregador.dto;
 
 import java.time.LocalDateTime;
 
-public class SolicitacaoAnaliseMessage {
+public class SolicitarVerificacaoStatusClienteMessage {
 
     private String requestId;
     private String cpf;
     private LocalDateTime dataHoraSolicitacao;
-    private String origem;
 
-    public SolicitacaoAnaliseMessage() {
+    public SolicitarVerificacaoStatusClienteMessage() {
     }
 
     public String getRequestId() {
@@ -36,21 +35,12 @@ public class SolicitacaoAnaliseMessage {
         this.dataHoraSolicitacao = dataHoraSolicitacao;
     }
 
-    public String getOrigem() {
-        return origem;
-    }
-
-    public void setOrigem(String origem) {
-        this.origem = origem;
-    }
-
     @Override
     public String toString() {
-        return "SolicitacaoAnaliseMessage{" +
+        return "SolicitarVerificacaoStatusClienteMessage{" +
                 "requestId='" + requestId + '\'' +
                 ", cpf='" + cpf + '\'' +
                 ", dataHoraSolicitacao=" + dataHoraSolicitacao +
-                ", origem='" + origem + '\'' +
                 '}';
     }
 }

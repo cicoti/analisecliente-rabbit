@@ -1,4 +1,4 @@
-package br.com.analisecliente.agregador.config;
+package br.com.analisecliente.credito.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -21,16 +21,10 @@ public class RabbitConfig {
 
     public static final String EXCHANGE = "analise.exchange";
 
-    public static final String SOLICITACAO_QUEUE = "analise.solicitacao.queue";
     public static final String CREDITO_SOLICITAR_QUEUE = "analise.credito.solicitar.queue";
-    public static final String FICHA_LIMPA_SOLICITAR_QUEUE = "analise.ficha-limpa.solicitar.queue";
-    public static final String STATUS_CLIENTE_SOLICITAR_QUEUE = "analise.status-cliente.solicitar.queue";
     public static final String CREDITO_RESULTADO_QUEUE = "analise.credito.resultado.queue";
 
-    public static final String SOLICITACAO_ROUTING_KEY = "analise.solicitacao";
     public static final String CREDITO_SOLICITAR_ROUTING_KEY = "analise.credito.solicitar";
-    public static final String FICHA_LIMPA_SOLICITAR_ROUTING_KEY = "analise.ficha-limpa.solicitar";
-    public static final String STATUS_CLIENTE_SOLICITAR_ROUTING_KEY = "analise.status-cliente.solicitar";
     public static final String CREDITO_RESULTADO_ROUTING_KEY = "analise.credito.resultado";
 
     @Bean
@@ -39,23 +33,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue solicitacaoQueue() {
-        return new Queue(SOLICITACAO_QUEUE, true);
-    }
-
-    @Bean
     public Queue creditoSolicitarQueue() {
         return new Queue(CREDITO_SOLICITAR_QUEUE, true);
-    }
-
-    @Bean
-    public Queue fichaLimpaSolicitarQueue() {
-        return new Queue(FICHA_LIMPA_SOLICITAR_QUEUE, true);
-    }
-
-    @Bean
-    public Queue statusClienteSolicitarQueue() {
-        return new Queue(STATUS_CLIENTE_SOLICITAR_QUEUE, true);
     }
 
     @Bean
@@ -64,23 +43,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding solicitacaoBinding(Queue solicitacaoQueue, DirectExchange analiseExchange) {
-        return BindingBuilder.bind(solicitacaoQueue).to(analiseExchange).with(SOLICITACAO_ROUTING_KEY);
-    }
-
-    @Bean
     public Binding creditoSolicitarBinding(Queue creditoSolicitarQueue, DirectExchange analiseExchange) {
         return BindingBuilder.bind(creditoSolicitarQueue).to(analiseExchange).with(CREDITO_SOLICITAR_ROUTING_KEY);
-    }
-
-    @Bean
-    public Binding fichaLimpaSolicitarBinding(Queue fichaLimpaSolicitarQueue, DirectExchange analiseExchange) {
-        return BindingBuilder.bind(fichaLimpaSolicitarQueue).to(analiseExchange).with(FICHA_LIMPA_SOLICITAR_ROUTING_KEY);
-    }
-
-    @Bean
-    public Binding statusClienteSolicitarBinding(Queue statusClienteSolicitarQueue, DirectExchange analiseExchange) {
-        return BindingBuilder.bind(statusClienteSolicitarQueue).to(analiseExchange).with(STATUS_CLIENTE_SOLICITAR_ROUTING_KEY);
     }
 
     @Bean

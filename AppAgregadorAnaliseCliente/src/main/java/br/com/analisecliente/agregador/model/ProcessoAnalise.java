@@ -5,19 +5,28 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import br.com.analisecliente.agregador.enums.StatusAnalise;
-
-@Document(collection = "processos")
+@Document(collection = "processo_analise")
 public class ProcessoAnalise {
 
     @Id
+    private String id;
     private String requestId;
     private String cpf;
-    private StatusAnalise status;
+    private String statusProcesso;
+    private LocalDateTime dataHoraSolicitacao;
     private ResultadoAnalise resultado;
     private ErroAnalise erro;
-    private LocalDateTime dataHoraSolicitacao;
-    private LocalDateTime dataHoraAtualizacao;
+
+    public ProcessoAnalise() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getRequestId() {
         return requestId;
@@ -35,12 +44,20 @@ public class ProcessoAnalise {
         this.cpf = cpf;
     }
 
-    public StatusAnalise getStatus() {
-        return status;
+    public String getStatusProcesso() {
+        return statusProcesso;
     }
 
-    public void setStatus(StatusAnalise status) {
-        this.status = status;
+    public void setStatusProcesso(String statusProcesso) {
+        this.statusProcesso = statusProcesso;
+    }
+
+    public LocalDateTime getDataHoraSolicitacao() {
+        return dataHoraSolicitacao;
+    }
+
+    public void setDataHoraSolicitacao(LocalDateTime dataHoraSolicitacao) {
+        this.dataHoraSolicitacao = dataHoraSolicitacao;
     }
 
     public ResultadoAnalise getResultado() {
@@ -57,21 +74,5 @@ public class ProcessoAnalise {
 
     public void setErro(ErroAnalise erro) {
         this.erro = erro;
-    }
-
-    public LocalDateTime getDataHoraSolicitacao() {
-        return dataHoraSolicitacao;
-    }
-
-    public void setDataHoraSolicitacao(LocalDateTime dataHoraSolicitacao) {
-        this.dataHoraSolicitacao = dataHoraSolicitacao;
-    }
-
-    public LocalDateTime getDataHoraAtualizacao() {
-        return dataHoraAtualizacao;
-    }
-
-    public void setDataHoraAtualizacao(LocalDateTime dataHoraAtualizacao) {
-        this.dataHoraAtualizacao = dataHoraAtualizacao;
     }
 }

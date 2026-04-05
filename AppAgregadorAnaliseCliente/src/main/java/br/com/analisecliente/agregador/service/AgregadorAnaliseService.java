@@ -1,6 +1,6 @@
 package br.com.analisecliente.agregador.service;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -33,6 +33,7 @@ import br.com.analisecliente.agregador.util.ResponseFactory;
 public class AgregadorAnaliseService {
 
     private static final long TIMEOUT_SECONDS = 3L;
+    private static final String ORIGEM_ERRO = "AgregadorAnaliseCliente";
 
     private final CreditoClient creditoClient;
     private final FichaLimpaClient fichaLimpaClient;
@@ -55,18 +56,37 @@ public class AgregadorAnaliseService {
     public ResponsePadrao processar(ProcessarAnaliseRequest request) {
         validarRequest(request);
 
-        ProcessoAnalise processo = processoAnaliseRepository.findById(request.getRequestId())
-                .orElseThrow(() -> new ProcessoNaoEncontradoException("Processo não encontrado para o requestId informado"));
+        String cpfNumerico = normalizarCpf(request.getCpf());
+        request.setCpf(cpfNumerico);
+
+        ProcessoAnalise processo = processoAnaliseRepository.findByRequestId(request.getRequestId())
+                .orElseThrow(() -> new ProcessoNaoEncontradoException(
+                        "Processo não encontrado para o requestId informado"));
 
         try {
             CompletableFuture<VerificacaoCreditoDados> creditoFuture =
-                    executarComTimeout("Crédito", () -> creditoClient.verificar(request.getCpf()));
+                    executarComTimeout("Crédito", new CheckedSupplier<VerificacaoCreditoDados>() {
+                        @Override
+                        public VerificacaoCreditoDados get() throws Exception {
+                            return creditoClient.verificar(cpfNumerico);
+                        }
+                    });
 
             CompletableFuture<VerificacaoFichaLimpaDados> fichaLimpaFuture =
-                    executarComTimeout("Ficha Limpa", () -> fichaLimpaClient.verificar(request.getCpf()));
+                    executarComTimeout("Ficha Limpa", new CheckedSupplier<VerificacaoFichaLimpaDados>() {
+                        @Override
+                        public VerificacaoFichaLimpaDados get() throws Exception {
+                            return fichaLimpaClient.verificar(cpfNumerico);
+                        }
+                    });
 
             CompletableFuture<VerificacaoStatusClienteDados> statusClienteFuture =
-                    executarComTimeout("Status Cliente", () -> statusClienteClient.verificar(request.getCpf()));
+                    executarComTimeout("Status Cliente", new CheckedSupplier<VerificacaoStatusClienteDados>() {
+                        @Override
+                        public VerificacaoStatusClienteDados get() throws Exception {
+                            return statusClienteClient.verificar(cpfNumerico);
+                        }
+                    });
 
             CompletableFuture.allOf(creditoFuture, fichaLimpaFuture, statusClienteFuture).join();
 
@@ -80,7 +100,7 @@ public class AgregadorAnaliseService {
 
             ResultadoAgregadoResponse dados = new ResultadoAgregadoResponse();
             dados.setRequestId(request.getRequestId());
-            dados.setCpf(request.getCpf());
+            dados.setCpf(cpfNumerico);
             dados.setVerificacaoCredito(credito);
             dados.setVerificacaoFichaLimpa(fichaLimpa);
             dados.setVerificacaoStatusCliente(statusCliente);
@@ -111,7 +131,11 @@ public class AgregadorAnaliseService {
                     }
                 }, agregadorExecutor)
                 .orTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .exceptionally(ex -> {
+                .handle((resultado, ex) -> {
+                    if (ex == null) {
+                        return resultado;
+                    }
+
                     Throwable causa = ex;
 
                     if (causa instanceof CompletionException && causa.getCause() != null) {
@@ -120,8 +144,10 @@ public class AgregadorAnaliseService {
 
                     if (causa instanceof TimeoutException) {
                         throw new CompletionException(
-                                new RuntimeException("Timeout ao consultar serviço " + nomeServico + " após "
-                                        + TIMEOUT_SECONDS + " segundos", causa));
+                                new RuntimeException(
+                                        "Timeout ao consultar serviço " + nomeServico + " após "
+                                                + TIMEOUT_SECONDS + " segundos",
+                                        causa));
                     }
 
                     if (causa instanceof RuntimeException) {
@@ -133,7 +159,7 @@ public class AgregadorAnaliseService {
                 });
     }
 
-    private RuntimeException unwrapException(Exception ex) {
+    private RuntimeException unwrapException(Throwable ex) {
         Throwable causa = ex;
 
         while (causa instanceof CompletionException && causa.getCause() != null) {
@@ -154,38 +180,41 @@ public class AgregadorAnaliseService {
                                              boolean aprovado) {
 
         ResultadoAnalise resultado = new ResultadoAnalise();
-        resultado.setVerificacaoCredito(Map.of(
-                "possuiCredito", credito.getPossuiCredito(),
-                "mensagem", credito.getMensagem()
-        ));
-        resultado.setVerificacaoFichaLimpa(Map.of(
-                "possuiFichaLimpa", fichaLimpa.getPossuiFichaLimpa(),
-                "mensagem", fichaLimpa.getMensagem()
-        ));
-        resultado.setVerificacaoStatusCliente(Map.of(
-                "clienteAtivo", statusCliente.getClienteAtivo(),
-                "mensagem", statusCliente.getMensagem()
-        ));
-        resultado.setResultadoConsolidado(Map.of(
-                "aprovado", aprovado,
-                "motivo", aprovado ? "Cliente elegível" : "Cliente inelegível"
-        ));
 
-        processo.setStatus(StatusAnalise.CONCLUIDO);
+        Map<String, Object> verificacaoCredito = new HashMap<String, Object>();
+        verificacaoCredito.put("possuiCredito", credito.getPossuiCredito());
+        verificacaoCredito.put("mensagem", credito.getMensagem());
+
+        Map<String, Object> verificacaoFichaLimpa = new HashMap<String, Object>();
+        verificacaoFichaLimpa.put("possuiFichaLimpa", fichaLimpa.getPossuiFichaLimpa());
+        verificacaoFichaLimpa.put("mensagem", fichaLimpa.getMensagem());
+
+        Map<String, Object> verificacaoStatusCliente = new HashMap<String, Object>();
+        verificacaoStatusCliente.put("clienteAtivo", statusCliente.getClienteAtivo());
+        verificacaoStatusCliente.put("mensagem", statusCliente.getMensagem());
+
+        Map<String, Object> resultadoConsolidado = new HashMap<String, Object>();
+        resultadoConsolidado.put("aprovado", Boolean.valueOf(aprovado));
+        resultadoConsolidado.put("motivo", aprovado ? "Cliente elegível" : "Cliente inelegível");
+
+        resultado.setVerificacaoCredito(verificacaoCredito);
+        resultado.setVerificacaoFichaLimpa(verificacaoFichaLimpa);
+        resultado.setVerificacaoStatusCliente(verificacaoStatusCliente);
+        resultado.setResultadoConsolidado(resultadoConsolidado);
+
+        processo.setStatusProcesso(StatusAnalise.CONCLUIDO.name());
         processo.setResultado(resultado);
         processo.setErro(null);
-        processo.setDataHoraAtualizacao(LocalDateTime.now());
     }
 
     private void atualizarProcessoComErro(ProcessoAnalise processo, Throwable ex) {
         ErroAnalise erro = new ErroAnalise();
-        erro.setOrigem("AgregadorAnaliseCliente");
+        erro.setOrigem(ORIGEM_ERRO);
         erro.setMensagem(ex.getMessage());
 
-        processo.setStatus(StatusAnalise.ERRO);
+        processo.setStatusProcesso(StatusAnalise.ERRO.name());
         processo.setResultado(null);
         processo.setErro(erro);
-        processo.setDataHoraAtualizacao(LocalDateTime.now());
     }
 
     private void validarRequest(ProcessarAnaliseRequest request) {
@@ -201,13 +230,15 @@ public class AgregadorAnaliseService {
             throw new RequisicaoInvalidaException("CPF é obrigatório");
         }
 
-        String cpfNumerico = request.getCpf().replaceAll("\\D", "");
+        String cpfNumerico = normalizarCpf(request.getCpf());
 
         if (cpfNumerico.length() != 11) {
             throw new RequisicaoInvalidaException("CPF deve conter 11 dígitos");
         }
+    }
 
-        request.setCpf(cpfNumerico);
+    private String normalizarCpf(String cpf) {
+        return cpf.replaceAll("\\D", "");
     }
 
     @FunctionalInterface
