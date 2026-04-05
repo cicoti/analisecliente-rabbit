@@ -31,12 +31,13 @@ public class SolicitarAnaliseClienteService {
     public ResponsePadrao solicitarAnalise(SolicitarAnaliseClienteRequest request) {
         validarRequest(request);
 
+        String cpfNumerico = request.getCpf();
         String requestId = UUID.randomUUID().toString();
         LocalDateTime agora = LocalDateTime.now();
 
         ProcessoAnalise processo = new ProcessoAnalise();
         processo.setRequestId(requestId);
-        processo.setCpf(request.getCpf());
+        processo.setCpf(cpfNumerico);
         processo.setStatus(StatusAnalise.PROCESSANDO.name());
         processo.setResultado(null);
         processo.setErro(null);
@@ -48,7 +49,7 @@ public class SolicitarAnaliseClienteService {
         try {
             SolicitacaoAnaliseMessage message = new SolicitacaoAnaliseMessage();
             message.setRequestId(requestId);
-            message.setCpf(request.getCpf());
+            message.setCpf(cpfNumerico);
             message.setOrigem("AppSolicitacaoAnaliseCliente");
             message.setDataHoraSolicitacao(agora);
 

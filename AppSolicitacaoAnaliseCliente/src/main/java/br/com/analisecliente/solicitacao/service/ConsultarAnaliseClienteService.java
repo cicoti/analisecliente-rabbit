@@ -51,7 +51,9 @@ public class ConsultarAnaliseClienteService {
             return response;
         }
 
-        if (StatusAnalise.CONCLUIDO.name().equals(processo.getStatus()) && processo.getResultado() != null) {
+        if (StatusAnalise.CONCLUIDO.name().equals(processo.getStatus())
+                && processo.getResultado() != null
+                && processo.getResultado().getResultadoConsolidado() != null) {
             response.setResultado(mapearResultado(processo.getResultado()));
             response.setRetorno(ResponseFactory.criarRetornoSucesso("Consulta realizada com sucesso"));
             return response;

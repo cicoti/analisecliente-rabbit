@@ -1,8 +1,8 @@
 package br.com.analisecliente.agregador.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -15,20 +15,19 @@ import br.com.analisecliente.agregador.repository.ProcessoAnaliseRepository;
 public class AtualizarResultadoVerificacaoStatusClienteService {
 
     private final ProcessoAnaliseRepository processoAnaliseRepository;
+    private final ConsolidarResultadoAnaliseService consolidarResultadoAnaliseService;
 
-    public AtualizarResultadoVerificacaoStatusClienteService(ProcessoAnaliseRepository processoAnaliseRepository) {
+    public AtualizarResultadoVerificacaoStatusClienteService(
+            ProcessoAnaliseRepository processoAnaliseRepository,
+            ConsolidarResultadoAnaliseService consolidarResultadoAnaliseService) {
         this.processoAnaliseRepository = processoAnaliseRepository;
+        this.consolidarResultadoAnaliseService = consolidarResultadoAnaliseService;
     }
 
     public void executar(ResultadoVerificacaoStatusClienteMessage message) {
-        Optional<ProcessoAnalise> processoOptional = processoAnaliseRepository.findByRequestId(message.getRequestId());
-
-        if (!processoOptional.isPresent()) {
-            System.out.println("Processo não encontrado para requestId=" + message.getRequestId());
-            return;
-        }
-
-        ProcessoAnalise processoAnalise = processoOptional.get();
+        ProcessoAnalise processoAnalise = processoAnaliseRepository.findById(message.getRequestId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Processo não encontrado para requestId=" + message.getRequestId()));
 
         ResultadoAnalise resultadoAnalise = processoAnalise.getResultado();
         if (resultadoAnalise == null) {
@@ -43,8 +42,12 @@ public class AtualizarResultadoVerificacaoStatusClienteService {
 
         resultadoAnalise.setVerificacaoStatusCliente(verificacaoStatusCliente);
 
+        processoAnalise.setDataHoraAtualizacao(LocalDateTime.now());
+
         processoAnaliseRepository.save(processoAnalise);
 
         System.out.println("Resultado de status do cliente gravado no Mongo. requestId=" + message.getRequestId());
+
+        consolidarResultadoAnaliseService.executar(message.getRequestId());
     }
 }
