@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>br.com.analisecliente</groupId>
+    <groupId>br.com.analisecliente.solicitacao</groupId>
     <artifactId>AppSolicitacaoAnaliseCliente</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>AppSolicitacaoAnaliseCliente</name>

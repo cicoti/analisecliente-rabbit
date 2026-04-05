@@ -10,7 +10,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>br.com.analisecliente</groupId>
+	<groupId>br.com.analisecliente.agregador</groupId>
 	<artifactId>AppAgregadorAnaliseCliente</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>AppAgregadorAnaliseCliente</name>

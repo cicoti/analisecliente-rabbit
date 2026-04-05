@@ -1,0 +1,32 @@
+package br.com.analisecliente.solicitacao.dto;
+
+public class ResponsePadrao {
+
+    private String requestId;
+    private String statusProcesso;
+    private RetornoPadrao retorno;
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getStatusProcesso() {
+        return statusProcesso;
+    }
+
+    public void setStatusProcesso(String statusProcesso) {
+        this.statusProcesso = statusProcesso;
+    }
+
+    public RetornoPadrao getRetorno() {
+        return retorno;
+    }
+
+    public void setRetorno(RetornoPadrao retorno) {
+        this.retorno = retorno;
+    }
+}
