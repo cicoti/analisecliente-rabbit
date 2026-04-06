@@ -30,6 +30,10 @@ public class ConsultarAnaliseClienteService {
         response.setStatusProcesso(processo.getStatus());
 
         if (StatusAnalise.PROCESSANDO.name().equals(processo.getStatus())) {
+            if (processo.getResultado() != null) {
+                response.setResultado(mapearResultado(processo.getResultado()));
+            }
+
             response.setRetorno(ResponseFactory.criarRetornoSucesso("Solicitação em processamento"));
             return response;
         }
@@ -42,10 +46,14 @@ public class ConsultarAnaliseClienteService {
                 response.setErro(erroResponse);
             }
 
+            if (processo.getResultado() != null) {
+                response.setResultado(mapearResultado(processo.getResultado()));
+            }
+
             response.setRetorno(ResponseFactory.criarRetornoErro(
-                    -2,
-                    "ERRO_NEGOCIO",
-                    "Erro de negócio",
+                    -1,
+                    "ERRO_SISTEMICO",
+                    "Erro sistêmico",
                     "Falha no processamento da solicitação"
             ));
             return response;

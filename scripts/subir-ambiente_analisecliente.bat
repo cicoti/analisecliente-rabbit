@@ -23,10 +23,6 @@ echo ========================================
 echo FASE 1 - COMPILANDO PROJETOS
 echo ========================================
 
-cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppSolicitacaoAnaliseCliente
-call mvn clean install -DskipTests
-if errorlevel 1 goto erro
-
 cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppVerificacaoCreditoCliente
 call mvn clean install -DskipTests
 if errorlevel 1 goto erro
@@ -43,16 +39,37 @@ cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppAgregadorAnaliseCliente
 call mvn clean install -DskipTests
 if errorlevel 1 goto erro
 
+cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppSolicitacaoAnaliseCliente
+call mvn clean install -DskipTests
+if errorlevel 1 goto erro
+
 echo.
 echo ========================================
 echo FASE 2 - SUBINDO APLICACOES
 echo ========================================
 
-start "AppSolicitacaoAnaliseCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppSolicitacaoAnaliseCliente && mvn spring-boot:run"
+echo Iniciando AppVerificacaoCreditoCliente...
 start "AppVerificacaoCreditoCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppVerificacaoCreditoCliente && mvn spring-boot:run"
+echo Aguardando 3 segundos...
+timeout /t 3 /nobreak >nul
+
+echo Iniciando AppVerificacaoFichaLimpaCliente...
 start "AppVerificacaoFichaLimpaCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppVerificacaoFichaLimpaCliente && mvn spring-boot:run"
+echo Aguardando 3 segundos...
+timeout /t 3 /nobreak >nul
+
+echo Iniciando AppVerificacaoStatusCliente...
 start "AppVerificacaoStatusCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppVerificacaoStatusCliente && mvn spring-boot:run"
+echo Aguardando 3 segundos...
+timeout /t 3 /nobreak >nul
+
+echo Iniciando AppAgregadorAnaliseCliente...
 start "AppAgregadorAnaliseCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppAgregadorAnaliseCliente && mvn spring-boot:run"
+echo Aguardando 3 segundos...
+timeout /t 3 /nobreak >nul
+
+echo Iniciando AppSolicitacaoAnaliseCliente...
+start "AppSolicitacaoAnaliseCliente" cmd /k "cd /d C:\projetos\ctech\analisecliente\rabbitmq\AppSolicitacaoAnaliseCliente && mvn spring-boot:run"
 
 echo.
 echo Aplicacoes iniciadas.
