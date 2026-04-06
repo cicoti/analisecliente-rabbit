@@ -10,7 +10,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import com.mongodb.client.result.UpdateResult;
+
 import br.com.analisecliente.agregador.dto.ResultadoVerificacaoStatusClienteMessage;
+import br.com.analisecliente.agregador.enums.StatusAnalise;
 import br.com.analisecliente.agregador.model.ProcessoAnalise;
 
 @Service
@@ -32,13 +35,22 @@ public class AtualizarResultadoVerificacaoStatusClienteService {
         verificacaoStatusCliente.put("mensagem", message.getMensagem());
         verificacaoStatusCliente.put("dataHoraProcessamento", message.getDataHoraProcessamento());
 
-        Query query = Query.query(Criteria.where("_id").is(message.getRequestId()));
+        Query query = Query.query(
+                Criteria.where("_id").is(message.getRequestId())
+                        .and("status").is(StatusAnalise.PROCESSANDO.name())
+        );
 
         Update update = new Update();
         update.set("resultado.verificacaoStatusCliente", verificacaoStatusCliente);
         update.set("dataHoraAtualizacao", LocalDateTime.now());
 
-        mongoTemplate.updateFirst(query, update, ProcessoAnalise.class);
+        UpdateResult resultadoUpdate = mongoTemplate.updateFirst(query, update, ProcessoAnalise.class);
+
+        if (resultadoUpdate.getMatchedCount() == 0) {
+            System.out.println("Resultado de status do cliente ignorado. Processo não está mais em PROCESSANDO. requestId="
+                    + message.getRequestId());
+            return;
+        }
 
         System.out.println("Resultado de status do cliente gravado no Mongo. requestId=" + message.getRequestId());
 
